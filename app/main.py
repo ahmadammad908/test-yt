@@ -234,13 +234,14 @@ async def download_file(
             raise RuntimeError(f"{provider} file too small ({total} bytes)")
 
         background_tasks.add_task(delete_temp_file, str(temp_path))
+        ascii_filename = re.sub(r'[^\x20-\x7E]', '_', filename).replace('"', '_')
         return FileResponse(
             path=str(temp_path),
             filename=filename,
             media_type=media_type,
             headers={
                 "Content-Disposition": (
-                    f'attachment; filename="{filename}"; '
+                    f'attachment; filename="{ascii_filename}"; '
                     f"filename*=UTF-8''{quote(filename)}"
                 ),
                 "Access-Control-Expose-Headers": (
@@ -273,12 +274,16 @@ async def download_file(
         filename = result["filename"]
         content_type = result["content_type"]
         background_tasks.add_task(delete_temp_file, file_path)
+        ascii_filename = re.sub(r'[^\x20-\x7E]', '_', filename).replace('"', '_')
         return FileResponse(
             path=file_path,
             filename=filename,
             media_type=content_type,
             headers={
-                "Content-Disposition": f'attachment; filename="{filename}"',
+                "Content-Disposition": (
+                    f'attachment; filename="{ascii_filename}"; '
+                    f"filename*=UTF-8''{quote(filename)}"
+                ),
                 "Access-Control-Expose-Headers": (
                     "Content-Disposition, X-Download-Mode, X-Download-Provider"
                 ),

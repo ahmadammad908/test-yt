@@ -567,9 +567,12 @@ def _download_sync(
 
     session_id = uuid.uuid4().hex[:10]
 
+    # IMPORTANT: Never use %(title)s in the temporary filename.
+    # Facebook titles can be extremely long and may contain Unicode characters.
+    # Use a short unique session ID instead.
     out_template = str(
         DOWNLOADS_DIR
-        / f"{session_id}_%(title)s.%(ext)s"
+        / f"{session_id}.%(ext)s"
     )
 
     ydl_opts: Dict[str, Any] = _build_ydl_opts({
@@ -761,7 +764,7 @@ def _download_sync(
 
     matching_files = list(
         DOWNLOADS_DIR.glob(
-            f"{session_id}_*"
+            f"{session_id}.*"
         )
     )
 
